@@ -16,10 +16,10 @@ mongoose.set("strictQuery", true);
 
 app.use("/uploads", express.static("uploads"));
 app.use(express.json());
-app.use(cors("https://blog-users-delta.vercel.app/"));
+app.use(cors());
 
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect("mongodb://127.0.0.1:27017/items")
   .then(() => {
     console.log("db ok");
   })
@@ -81,7 +81,7 @@ app.post("/posts/:id/toggleLike", checkAuth, postController.toggleLike);
 app.post("/comments/:id", checkAuth, commentController.createComment);
 app.get("/posts/comments/:id", commentController.getPostComments);
 
-app.listen(process.env.PORT || 4000, (err) => {
+app.listen(3002, (err) => {
   if (err) {
     console.log(err);
   }

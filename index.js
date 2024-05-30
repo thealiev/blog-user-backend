@@ -81,7 +81,7 @@ app.post("/posts/:id/toggleLike", checkAuth, postController.toggleLike);
 app.post("/comments/:id", checkAuth, commentController.createComment);
 app.get("/posts/comments/:id", commentController.getPostComments);
 
-app.listen(process.env.PORT || 4000, (err) => {
+app.listen(process.env.PORT || 3005, (err) => {
   if (err) {
     console.log(err);
   }

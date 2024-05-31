@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const { authValidation, loginValidation } = require("./validations/auth.js");
@@ -16,12 +17,10 @@ mongoose.set("strictQuery", true);
 
 app.use("/uploads", express.static("uploads"));
 app.use(express.json());
-app.use(cors({ origin: "https://blog-users-delta.vercel.app/" }));
+app.use(cors());
 
 mongoose
-  .connect(
-    "mongodb+srv://tarqymuhammadal:vZvNETIj77zGz4IV@cluster0.yp9dfcy.mongodb.net/"
-  )
+  .connect(process.env.MONGODB_URI)
   .then(() => {
     console.log("db ok");
   })
@@ -83,10 +82,10 @@ app.post("/posts/:id/toggleLike", checkAuth, postController.toggleLike);
 app.post("/comments/:id", checkAuth, commentController.createComment);
 app.get("/posts/comments/:id", commentController.getPostComments);
 
-app.listen(3002 || 4000 , (err) => {
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, (err) => {
   if (err) {
     console.log(err);
   }
-  console.log("server ok");
+  console.log(`Server running on port ${PORT}`);
 });
-

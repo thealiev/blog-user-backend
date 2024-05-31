@@ -20,7 +20,7 @@ app.use(cors());
 
 mongoose
   .connect(
-    "mongodb+srv://salohiddin:Lhi6MnsEgGvQI8TB@cluster0.u6hlpei.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    "mongodb+srv://tarqymuhammadal:vZvNETIj77zGz4IV@cluster0.yp9dfcy.mongodb.net/"
   )
   .then(() => {
     console.log("db ok");
@@ -83,7 +83,7 @@ app.post("/posts/:id/toggleLike", checkAuth, postController.toggleLike);
 app.post("/comments/:id", checkAuth, commentController.createComment);
 app.get("/posts/comments/:id", commentController.getPostComments);
 
-app.listen(3002 || 4000, (err) => {
+app.listen(3002 || 4000 , (err) => {
   if (err) {
     console.log(err);
   }

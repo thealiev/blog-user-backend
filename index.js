@@ -19,7 +19,9 @@ app.use(express.json());
 app.use(cors());
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/items")
+  .connect(
+    "mongodb+srv://salohiddin:Lhi6MnsEgGvQI8TB@cluster0.u6hlpei.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+  )
   .then(() => {
     console.log("db ok");
   })

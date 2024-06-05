@@ -1,16 +1,18 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const multer = require("multer");
 const { authValidation, loginValidation } = require("./validations/auth.js");
 const { postValidation } = require("./validations/post.js");
 const checkAuth = require("./utils/checkAuth.js");
+const handleValidationErrors = require("./utils/handleValidationErrors.js");
 const userController = require("./controllers/user.js");
 const postController = require("./controllers/post.js");
 const commentController = require("./controllers/comments.js");
 const searchController = require("./controllers/search.js");
-const cors = require("cors");
-const multer = require("multer");
-const handleValidationErrors = require("./utils/handleValidationErrors.js");
+const jiraController = require("./controllers/jiraController.js");
 
 const app = express();
 mongoose.set("strictQuery", true);
@@ -18,6 +20,7 @@ mongoose.set("strictQuery", true);
 app.use("/uploads", express.static("uploads"));
 app.use(express.json());
 app.use(cors());
+app.use(bodyParser.json());
 
 mongoose
   .connect(process.env.MONGODB_URI)
@@ -44,12 +47,14 @@ app.post(
   handleValidationErrors,
   userController.register
 );
+
 app.post(
   "/auth/login",
   loginValidation,
   handleValidationErrors,
   userController.login
 );
+
 app.get("/auth/me", checkAuth, userController.getMe);
 app.post("/upload", checkAuth, upload.single("image"), (req, res) => {
   res.json({
@@ -60,6 +65,7 @@ app.post("/upload", checkAuth, upload.single("image"), (req, res) => {
 app.get("/posts/search", searchController.searchPosts);
 
 app.get("/tags", postController.getLastTags);
+
 app.post(
   "/posts",
   checkAuth,
@@ -67,6 +73,7 @@ app.post(
   handleValidationErrors,
   postController.create
 );
+
 app.get("/posts", postController.getAll);
 app.get("/posts/popular", postController.getPopular);
 app.get("/posts/:id", postController.getOne);
@@ -78,9 +85,12 @@ app.patch(
   handleValidationErrors,
   postController.update
 );
+
 app.post("/posts/:id/toggleLike", checkAuth, postController.toggleLike);
 app.post("/comments/:id", checkAuth, commentController.createComment);
 app.get("/posts/comments/:id", commentController.getPostComments);
+
+app.post("/jiraController/create-ticket", jiraController.createTicket);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, (err) => {

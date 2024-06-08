@@ -2,7 +2,7 @@ const axios = require("axios");
 const express = require("express");
 const router = express.Router();
 
-router.post("/jiraController/create-ticket", async (req, res) => {
+router.post("/api/create-ticket", async (req, res) => {
   const { user, summary, priority, link, collection } = req.body;
 
   const jiraPayload = {

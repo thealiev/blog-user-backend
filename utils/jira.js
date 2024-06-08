@@ -1,44 +1,50 @@
 const axios = require("axios");
+const express = require("express");
+const router = express.Router();
 
-async function createJiraTicket(user, summary, priority, link, collection) {
-  const jiraUrl = `https://${process.env.JIRA_DOMAIN}/rest/api/3/issue`;
-  const jiraAuth = Buffer.from(
-    `${process.env.JIRA_EMAIL}:${process.env.JIRA_API_TOKEN}`
-  ).toString("base64");
+router.post("/jiraController/create-ticket", async (req, res) => {
+  const { user, summary, priority, link, collection } = req.body;
 
-  const ticketData = {
+  const jiraPayload = {
     fields: {
       project: {
-        key: "KAN",
+        key: JIRA_PROJECT_KEY,
       },
       summary: summary,
-      description: `Collection: ${collection}\nPage Link: ${link}`,
+      description: `Collection: ${collection}\nLink: ${link}`,
       issuetype: {
-        name: "Task", // Replace with the appropriate issue type
-      },
-      reporter: {
-        name: user.username, // Ensure this matches a Jira user
+        name: "Task",
       },
       priority: {
         name: priority,
       },
+      reporter: {
+        name: user.username,
+      },
+      labels: ["support_ticket"],
     },
   };
 
   try {
-    const response = await axios.post(jiraUrl, ticketData, {
-      headers: {
-        Authorization: `Basic ${jiraAuth}`,
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data;
+    const response = await axios.post(
+      `${JIRA_DOMAIN}/rest/api/3/issue`,
+      jiraPayload,
+      {
+        auth: {
+          username: JIRA_EMAIL,
+          password: JIRA_API_TOKEN,
+        },
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    res.status(201).json({ key: response.data.key });
   } catch (error) {
-    console.error("Error creating Jira ticket:", error.response.data);
-    throw error;
+    console.error("Error creating ticket:", error);
+    res.status(500).json({ error: "Failed to create ticket" });
   }
-}
+});
 
-module.exports = {
-  createJiraTicket,
-};
+module.exports = router;

@@ -20,7 +20,6 @@ mongoose.set("strictQuery", true);
 app.use("/uploads", express.static("uploads"));
 app.use(express.json());
 app.use(cors());
-app.use(bodyParser.json());
 
 mongoose
   .connect(process.env.MONGODB_URI)
@@ -90,7 +89,26 @@ app.post("/posts/:id/toggleLike", checkAuth, postController.toggleLike);
 app.post("/comments/:id", checkAuth, commentController.createComment);
 app.get("/posts/comments/:id", commentController.getPostComments);
 
-app.post("/jiraController/create-ticket", jiraController.createTicket);
+app.post("/jiraController/create-ticket", async (req, res) => {
+  try {
+    const { user, summary, priority, link, collection } = req.body;
+
+    const ticket = await createTicketInJira(
+      user,
+      summary,
+      priority,
+      link,
+      collection
+    );
+
+    res.status(201).json({ key: ticket.key });
+  } catch (error) {
+    console.error("Error creating ticket:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, (err) => {

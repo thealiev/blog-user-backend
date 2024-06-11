@@ -1,7 +1,6 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
 const cors = require("cors");
 const multer = require("multer");
 const { authValidation, loginValidation } = require("./validations/auth.js");
@@ -12,14 +11,15 @@ const userController = require("./controllers/user.js");
 const postController = require("./controllers/post.js");
 const commentController = require("./controllers/comments.js");
 const searchController = require("./controllers/search.js");
-const jiraController = require("./controllers/jiraController.js");
+const jiraRoutes = require("./routes/jiraRoutes.js");
 
 const app = express();
 mongoose.set("strictQuery", true);
 
 app.use("/uploads", express.static("uploads"));
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin: "*" }));
+app.use("/api", jiraRoutes);
 
 mongoose
   .connect(process.env.MONGODB_URI)
@@ -89,31 +89,7 @@ app.post("/posts/:id/toggleLike", checkAuth, postController.toggleLike);
 app.post("/comments/:id", checkAuth, commentController.createComment);
 app.get("/posts/comments/:id", commentController.getPostComments);
 
-app.post("/api/create-ticket", async (req, res) => {
-  try {
-    const { user, summary, priority, link, collection } = req.body;
-
-    const ticket = await createTicketInJira(
-      user,
-      summary,
-      priority,
-      link,
-      collection
-    );
-
-    res.status(201).json({ key: ticket.key });
-  } catch (error) {
-    console.error("Error creating ticket:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-
-
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, (err) => {
-  if (err) {
-    console.log(err);
-  }
+app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

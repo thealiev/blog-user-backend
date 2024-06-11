@@ -1,33 +1,27 @@
-// jiraControllers.js
-const { getJiraUserTickets } = require("../utils/jira");
+const Ticket = require("../models/ticket");
 
 const createTicket = async (req, res) => {
-  const { user, summary, priority, link, collection } = req.body;
-
   try {
-    const ticket = await createJiraTicket(
-      user,
-      summary,
-      priority,
-      link,
-      collection
-    );
-    res.json(ticket);
-  } catch (error) {
-    console.error("Error creating ticket:", error);
-    res.status(500).json({ error: "Failed to create Jira ticket" });
+    const newTicket = new Ticket({
+      title: req.body.summary,
+      description: req.body.priority,
+      link: req.body.link,
+      collection: req.body.collection,
+    });
+
+    const savedTicket = await newTicket.save();
+    res.status(201).json(savedTicket);
+  } catch (err) {
+    res.status(500).json({ error: "Error creating ticket: " + err.message });
   }
 };
 
 const getUserTickets = async (req, res) => {
-  const { user } = req.body;
-
   try {
-    const tickets = await getJiraUserTickets(user);
-    res.json(tickets);
-  } catch (error) {
-    console.error("Error fetching user's tickets:", error);
-    res.status(500).json({ error: "Failed to fetch user's tickets" });
+    const tickets = await Ticket.find({ user: req.userId });
+    res.status(200).json(tickets);
+  } catch (err) {
+    res.status(500).json({ error: "Error retrieving tickets: " + err.message });
   }
 };
 

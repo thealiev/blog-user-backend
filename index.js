@@ -3,27 +3,34 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const multer = require("multer");
-const { authValidation, loginValidation } = require("./validations/auth.js");
-const { postValidation } = require("./validations/post.js");
-const checkAuth = require("./utils/checkAuth.js");
-const handleValidationErrors = require("./utils/handleValidationErrors.js");
-const userController = require("./controllers/user.js");
-const postController = require("./controllers/post.js");
-const commentController = require("./controllers/comments.js");
-const searchController = require("./controllers/search.js");
-const jiraController = require("./controllers/jiraController.js");
-const jiraRoutes = require("./routes/jiraRoutes.js");
+const { authValidation, loginValidation } = require("./validations/auth");
+const { postValidation } = require("./validations/post");
+const checkAuth = require("./utils/checkAuth");
+const { getJiraUserTickets } = require("./utils/jira");
+const handleValidationErrors = require("./utils/handleValidationErrors");
+const userController = require("./controllers/user");
+const postController = require("./controllers/post");
+const commentController = require("./controllers/comments");
+const searchController = require("./controllers/search");
+const ticketRoutes = require("./routes/ticketRoutes");
+const jiraRoutes = require("./routes/jiraRoutes");
 
 const app = express();
 mongoose.set("strictQuery", true);
 
 app.use("/uploads", express.static("uploads"));
-app.use("/api", jiraRoutes);
 app.use(express.json());
 app.use(cors({ origin: "*" }));
+app.use("/api/tickets", ticketRoutes);
+app.use("/api", jiraRoutes);
+
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
 
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(process.env.MONGODB_URI, {})
   .then(() => {
     console.log("db ok");
   })
@@ -56,14 +63,8 @@ app.post(
 );
 
 app.get("/auth/me", checkAuth, userController.getMe);
-app.post("/upload", checkAuth, upload.single("image"), (req, res) => {
-  res.json({
-    url: `uploads/${req.file.originalname}`,
-  });
-});
 
 app.get("/posts/search", searchController.searchPosts);
-
 app.get("/tags", postController.getLastTags);
 
 app.post(
@@ -89,9 +90,6 @@ app.patch(
 app.post("/posts/:id/toggleLike", checkAuth, postController.toggleLike);
 app.post("/comments/:id", checkAuth, commentController.createComment);
 app.get("/posts/comments/:id", commentController.getPostComments);
-
-app.post("/jira/create-ticket", jiraController.createTicket);
-app.get("/jira/user-tickets", jiraController.getUserTickets);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {

@@ -12,11 +12,13 @@ const postController = require("./controllers/post.js");
 const commentController = require("./controllers/comments.js");
 const searchController = require("./controllers/search.js");
 const jiraController = require("./controllers/jiraController.js");
+const jiraRoutes = require("./routes/jiraRoutes.js");
 
 const app = express();
 mongoose.set("strictQuery", true);
 
 app.use("/uploads", express.static("uploads"));
+app.use("/api", jiraRoutes);
 app.use(express.json());
 app.use(cors({ origin: "*" }));
 
@@ -88,8 +90,8 @@ app.post("/posts/:id/toggleLike", checkAuth, postController.toggleLike);
 app.post("/comments/:id", checkAuth, commentController.createComment);
 app.get("/posts/comments/:id", commentController.getPostComments);
 
-app.post("/api/create-ticket", jiraController.createTicket);
-app.get("/api/user-tickets", jiraController.getUserTickets);
+app.post("/jira/create-ticket", jiraController.createTicket);
+app.get("/jira/user-tickets", jiraController.getUserTickets);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {

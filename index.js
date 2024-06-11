@@ -11,7 +11,7 @@ const userController = require("./controllers/user.js");
 const postController = require("./controllers/post.js");
 const commentController = require("./controllers/comments.js");
 const searchController = require("./controllers/search.js");
-const jiraRoutes = require("./routes/jiraRoutes.js");
+const jiraController = require("./controllers/jiraController.js");
 
 const app = express();
 mongoose.set("strictQuery", true);
@@ -19,7 +19,6 @@ mongoose.set("strictQuery", true);
 app.use("/uploads", express.static("uploads"));
 app.use(express.json());
 app.use(cors({ origin: "*" }));
-app.use("/api", jiraRoutes);
 
 mongoose
   .connect(process.env.MONGODB_URI)
@@ -88,6 +87,9 @@ app.patch(
 app.post("/posts/:id/toggleLike", checkAuth, postController.toggleLike);
 app.post("/comments/:id", checkAuth, commentController.createComment);
 app.get("/posts/comments/:id", commentController.getPostComments);
+
+app.post("/api/create-ticket", jiraController.createTicket);
+app.get("/api/user-tickets", jiraController.getUserTickets);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
